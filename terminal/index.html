@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AniPub • Terminal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --fg: #f0f6fc;
+    --accent: #58a6ff;
+    --purple: #d2a8ff;
+    --green: #56d364;
+    --yellow: #f5d04e;
+    --red: #f85149;
+    --cyan: #39c5cf;
+    --gray: #8b949e;
+    --border: #30363d;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Fira Code', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  #terminal {
+    width: 96%;
+    max-width: 1100px;
+    height: 94vh;
+    background: #010101;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 70px rgba(0,0,0,0.9);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    background: #161b22;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--gray);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .red { background: #ff5f56; }
+  .yellow { background: #ffbd2e; }
+  .green { background: #28ca42; }
+
+  .title { color: var(--accent); font-weight: 600; }
+
+  .content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    line-height: 1.8;
+  }
+
+  .ascii {
+    text-align: center;
+    color: var(--purple);
+    font-size: 20px;
+    line-height: 1.2;
+    margin: 0 0 8px;
+    letter-spacing: 1px;
+  }
+
+  .logo {
+    text-align: center;
+    color: var(--cyan);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .line { margin: 8px 0; }
+  .prompt-line { display: flex; align-items: center; margin-top: 16px; }
+  .prompt { color: var(--green); font-weight: bold; }
+  .user { color: var(--accent); }
+  .path { color: var(--yellow); }
+
+  input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 17px;
+    flex: 1;
+    margin-left: 8px;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 10px;
+    height: 22px;
+    background: var(--accent);
+    margin-left: 4px;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+
+  .info { color: var(--cyan); }
+  .success { color: var(--green); }
+  .warning { color: var(--yellow); }
+  .error { color: var(--red); }
+  .dim { color: var(--gray); }
+  .bold { font-weight: 600; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div id="terminal">
+  <div class="header">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <span class="title">anipub-terminal</span>
+  </div>
+
+  <div class="content">
+    <pre class="ascii">
+ █████╗ ███╗   ██╗██╗██████╗ ██╗   ██╗██████╗ 
+ ██╔══██╗████╗  ██║██║██╔══██╗██║   ██║██╔══██╗
+ ███████║██╔██╗ ██║██║██████╔╝██║   ██║██████╔╝
+ ██╔══██║██║╚██╗██║██║██╔═══╝ ██║   ██║██╔══██╗
+ ██║  ██║██║ ╚████║██║██║     ╚██████╔╝██║███║
+ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝
+    </pre>
+    <div class="logo">ANIPUB • TERMINAL v2.0</div>
+
+    <div class="line dim">Connected to <span class="info">https://www.anipub.xyz</span></div>
+    <div class="line">Total entries: <span class="bold warning" id="total">⋯</span></div>
+    <div class="line"></div>
+
+    <div id="output"></div>
+
+    <div class="prompt-line">
+      <span class="prompt">$</span>
+      <span class="user">guest</span>@<span class="path">anipub</span><span>:~$</span>
+      <input type="text" id="cmd" autofocus autocomplete="off">
+      <div class="cursor"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const output = document.getElementById('output');
+const input = document.getElementById('cmd');
+const totalSpan = document.getElementById('total');
+let TOTAL = '⋯';
+let mode = 'main';
+
+function print(text = '') {
+  const div = document.createElement('div');
+  div.className = 'line';
+  div.innerHTML = text;
+  output.appendChild(div);
+  output.parentElement.scrollTop = output.parentElement.scrollHeight;
+}
+
+async function loadTotal() {
+  try {
+    const r = await fetch('https://www.anipub.xyz/api/getAll');
+    const j = await r.json();
+    TOTAL = j.total || '???';
+    totalSpan.textContent = TOTAL;
+  } catch {
+    totalSpan.textContent = 'offline';
+  }
+}
+
+async function getAnime(id) {
+  const r = await fetch(`https://www.anipub.xyz/api/info/${id}`);
+  if (!r.ok) throw '';
+  return await r.json();
+}
+
+async function showAnime(id) {
+  output.innerHTML = '';
+  print(`Fetching anime <span class="bold">${id}</span>...<br>`);
+  try {
+    const a = await getAnime(id);
+    output.innerHTML = '';
+
+    print(`<span class="bold" style="font-size:21px;color:#d2a8ff;">${a.Name || 'Unknown Title'}</span><br>`);
+    const ep = (a.epCount || 0) + 1;
+
+    print(`<span class="dim"> ├─ Episodes </span> <span class="success bold">${ep}</span>`);
+    print(`<span class="dim"> ├─ Status   </span> <span class="yellow">${a.Status || 'N/A'}</span>`);
+    print(`<span class="dim"> ├─ Aired    </span> <span class="cyan">${a.Aired || 'N/A'}</span>`);
+    print(`<span class="dim"> ├─ Studio   </span> <span class="info">${a.Studios || 'N/A'}</span>`);
+    print(`<span class="dim"> ├─ Genres   </span> <span class="warning">${Array.isArray(a.Genres) ? a.Genres.join(', ') : a.Genres || '—'}</span>`);
+    if (a.MALScore) print(`<span class="dim"> ├─ Score    </span> <span class="success bold">${a.MALScore}</span>`);
+    print(`<span class="dim"> └─ Duration </span> ${a.Duration || 'N/A'}<br>`);
+
+    print(`<span class="dim">Synopsis:</span><br><span class="dim">${(a.DescripTion || 'No description.').replace(/\n/g, '<br>')}</span><br>`);
+    print(`<span class="success bold">Watch → </span><a href="https://anipub.xyz/aniplayer/${a._id}/0" target="_blank">Open Player</a>`);
+  } catch {
+    print(`<span class="error">Anime ID ${id} not found.</span>`);
+  }
+}
+
+function help() {
+  output.innerHTML = '';
+  print(`<span class="bold" style="color:#58a6ff;">Commands:</span>`);
+  print(`  <span class="yellow">[id]</span>      show anime info`);
+  print(`  <span class="yellow">w</span>         watch mode (type id → play)`);
+  print(`  <span class="yellow">back</span>      exit watch mode`);
+  print(`  <span class="yellow">help</span>      show this`);
+  print(`  <span class="yellow">clear</span>     clear screen`);
+  print(`  <span class="yellow">q</span>         quit<br>`);
+  print(`Database: <span class="success bold">${TOTAL}</span> titles`);
+}
+
+input.addEventListener('keydown', async e => {
+  if (e.key !== 'Enter') return;
+  const cmd = input.value.trim();
+  if (!cmd) { input.value = ''; return; }
+
+  print(`<span class="prompt">$</span> <span class="user">guest</span>@<span class="path">anipub</span>:~$ <span class="dim">${cmd}</span>`);
+  input.value = '';
+  const l = cmd.toLowerCase();
+
+  if (l === 'q') { print('<span class="success">Session closed.</span>'); input.disabled = true; return; }
+  if (l === 'clear') { output.innerHTML = ''; return; }
+  if (l === 'help') { help(); return; }
+  if (l === 'w') { mode = 'watch'; print('<span class="success">Watch mode on — enter ID to play</span>'); return; }
+  if (l === 'back' && mode === 'watch') { mode = 'main'; print('<span class="info">Back to main mode</span>'); return; }
+
+  if (/^\d+$/.test(l)) {
+    if (mode === 'watch') {
+      window.open(`https://anipub.xyz/aniplayer/${l}/0`, '_blank');
+      print(`<span class="success">Opening ID ${l}...</span>`);
+    } else {
+      await showAnime(l);
+    }
+    return;
+  }
+
+  print(`<span class="error">Unknown command</span>`);
+});
+
+loadTotal().then(() => {
+  print(`Ready. Type an ID, <span class="yellow">w</span> for watch mode, or <span class="yellow">help</span>`);
+});
+</script>
+</body>
+</html>
