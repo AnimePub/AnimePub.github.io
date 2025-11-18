@@ -2,266 +2,340 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AniPub • Terminal</title>
+<title>AniPub • Arch Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap');
-
-  :root {
-    --bg: #0d1117;
-    --fg: #f0f6fc;
-    --accent: #58a6ff;
-    --purple: #d2a8ff;
-    --green: #56d364;
-    --yellow: #f5d04e;
-    --red: #f85149;
-    --cyan: #39c5cf;
-    --gray: #8b949e;
-    --border: #30363d;
-  }
-
   * { margin:0; padding:0; box-sizing:border-box; }
-
   body {
-    height: 100vh;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: 'Fira Code', monospace;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+    background:#000;
+    color:#fff;
+    font-family:'JetBrains Mono', 'Courier New', monospace;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    font-size:15px;
+    line-height:1.6;
   }
-
-  #terminal {
-    width: 96%;
-    max-width: 1100px;
-    height: 94vh;
-    background: #010101;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 70px rgba(0,0,0,0.9);
-    border: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
+  #term {
+    flex:1;
+    padding:30px 40px 20px;  /* Proper top padding for logo */
+    overflow-y:auto;
+    background:#000;
   }
+  #term::-webkit-scrollbar { width:6px; background:#000; }
+  #term::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
 
-  .header {
-    background: #161b22;
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    color: var(--gray);
-    border-bottom: 1px solid var(--border);
+  .title-bar {
+    position:fixed;
+    top:0; left:0; right:0;
+    height:36px;
+    background:#111;
+    color:#888;
+    font-size:13px;
+    line-height:36px;
+    padding:0 15px;
+    border-bottom:1px solid #222;
+    user-select:none;
+    z-index:10;
   }
-
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .red { background: #ff5f56; }
-  .yellow { background: #ffbd2e; }
-  .green { background: #28ca42; }
-
-  .title { color: var(--accent); font-weight: 600; }
-
-  .content {
-    flex: 1;
-    padding: 24px;
-    overflow-y: auto;
-    line-height: 1.8;
-  }
-
-  .ascii {
-    text-align: center;
-    color: var(--purple);
-    font-size: 20px;
-    line-height: 1.2;
-    margin: 0 0 8px;
-    letter-spacing: 1px;
-  }
+  .dots { float:left; margin-right:15px; }
+  .dot { display:inline-block; width:12px; height:12px; border-radius:50%; margin:12px 4px 0 0; }
+  .red { background:#ff5f57; }
+  .yellow { background:#febc2e; }
+  .green { background:#28c840; }
 
   .logo {
-    text-align: center;
-    color: var(--cyan);
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 20px;
+    text-align:center;
+    margin:10px 0 30px 0;
+    color:#0f0;
+    font-size:13px;
+    line-height:1.4;
+    letter-spacing:1px;
+  }
+  .logo .title {
+    font-size:16px;
+    color:#87ff87;
+    font-weight:bold;
+    margin-top:8px;
   }
 
-  .line { margin: 8px 0; }
-  .prompt-line { display: flex; align-items: center; margin-top: 16px; }
-  .prompt { color: var(--green); font-weight: bold; }
-  .user { color: var(--accent); }
-  .path { color: var(--yellow); }
-
-  input {
-    background: none;
-    border: none;
-    outline: none;
-    color: var(--fg);
-    font-family: inherit;
-    font-size: 17px;
-    flex: 1;
-    margin-left: 8px;
+  .line { margin:5px 0; word-wrap:break-word; }
+  .prompt { color:#0f0; font-weight:bold; }
+  .input-line { display:flex; align-items:center; margin:5px 0; }
+  .input {
+    background:none;
+    border:none;
+    outline:none;
+    color:#fff;
+    font-family:inherit;
+    font-size:15px;
+    flex:1;
+    margin-left:6px;
+    caret-color:#0f0;
   }
 
-  .cursor {
-    display: inline-block;
-    width: 10px;
-    height: 22px;
-    background: var(--accent);
-    margin-left: 4px;
-    animation: blink 1s infinite;
+  .card {
+    background:#0a0a0a;
+    border:1px solid #222;
+    border-radius:8px;
+    padding:18px;
+    margin:20px 0;
   }
+  .anime-title {
+    font-size:21px;
+    color:#87ff87;
+    font-weight:bold;
+    margin-bottom:14px;
+  }
+  .info-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:12px;
+    margin:16px 0;
+  }
+  .info-item {
+    background:#111;
+    padding:11px 14px;
+    border-radius:6px;
+    border-left:3px solid #0f0;
+  }
+  .label { font-size:11px; color:#666; text-transform:uppercase; letter-spacing:0.8px; }
+  .value { margin-top:5px; color:#fff; font-weight:600; font-size:14.5px; }
+  .desc {
+    background:#080808;
+    padding:15px;
+    border-radius:6px;
+    margin:18px 0;
+    color:#bbb;
+    line-height:1.8;
+    font-size:14px;
+  }
+  .btn {
+    display:inline-block;
+    padding:10px 18px;
+    margin:6px 10px 6px 0;
+    background:#000;
+    border:1px solid #0f0;
+    color:#0f0;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:bold;
+    text-decoration:none;
+  }
+  .btn:hover { background:#0f0; color:#000; }
+  .btn.watch { border-color:#87ff87; color:#87ff87; }
+  .btn.watch:hover { background:#87ff87; color:#000; }
 
-  @keyframes blink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
-
-  .info { color: var(--cyan); }
-  .success { color: var(--green); }
-  .warning { color: var(--yellow); }
-  .error { color: var(--red); }
-  .dim { color: var(--gray); }
-  .bold { font-weight: 600; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  .cover-img {
+    max-width:100%;
+    border:2px solid #0f0;
+    border-radius:8px;
+    margin:22px 0;
+    display:block;
+  }
+  .dim { color:#666; }
+  .red { color:#ff5555; }
 </style>
 </head>
 <body>
 
-<div id="terminal">
-  <div class="header">
-    <div class="dot red"></div>
-    <div class="dot yellow"></div>
-    <div class="dot green"></div>
-    <span class="title">anipub-terminal</span>
+<div class="title-bar">
+  <div class="dots">
+    <span class="dot red"></span>
+    <span class="dot yellow"></span>
+    <span class="dot green"></span>
   </div>
+  anipub-terminal — /home/user
+</div>
 
-  <div class="content">
-    <pre class="ascii">
- █████╗ ███╗   ██╗██╗██████╗ ██╗   ██╗██████╗ 
- ██╔══██╗████╗  ██║██║██╔══██╗██║   ██║██╔══██╗
- ███████║██╔██╗ ██║██║██████╔╝██║   ██║██████╔╝
- ██╔══██║██║╚██╗██║██║██╔═══╝ ██║   ██║██╔══██╗
- ██║  ██║██║ ╚████║██║██║     ╚██████╔╝██║███║
- ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝
-    </pre>
-    <div class="logo">ANIPUB • TERMINAL v2.0</div>
-
-    <div class="line dim">Connected to <span class="info">https://www.anipub.xyz</span></div>
-    <div class="line">Total entries: <span class="bold warning" id="total">⋯</span></div>
-    <div class="line"></div>
-
-    <div id="output"></div>
-
-    <div class="prompt-line">
-      <span class="prompt">$</span>
-      <span class="user">guest</span>@<span class="path">anipub</span><span>:~$</span>
-      <input type="text" id="cmd" autofocus autocomplete="off">
-      <div class="cursor"></div>
-    </div>
+<div id="term">
+  <div class="logo">
+    █████╗  ███╗   ██╗██╗██████╗ ██╗   ██╗██████╗ <br>
+    ██╔══██╗████╗  ██║██║██╔══██╗██║   ██║██╔══██╗<br>
+    ███████║██╔██╗ ██║██║██████╔╝██║   ██║██████╔╝<br>
+    ██╔══██║██║╚██╗██║██║██╔═══╝ ██║   ██║██╔══██╗<br>
+    ██║  ██║██║ ╚████║██║██║     ╚██████╔╝██║████║<br>
+    ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝<br><br>
+    <div class="title">A N I P U B • TERMINAL</div>
   </div>
+  <div class="line dim">Connecting to AniPub database...</div>
 </div>
 
 <script>
-const output = document.getElementById('output');
-const input = document.getElementById('cmd');
-const totalSpan = document.getElementById('total');
-let TOTAL = '⋯';
+const term = document.getElementById('term');
 let mode = 'main';
+let TOTAL = 0;
+const PROXY = 'https://api.allorigins.win/raw?url=';
 
-function print(text = '') {
-  const div = document.createElement('div');
-  div.className = 'line';
-  div.innerHTML = text;
-  output.appendChild(div);
-  output.parentElement.scrollTop = output.parentElement.scrollHeight;
+function println(text = '') {
+  const line = document.createElement('div');
+  line.className = 'line';
+  line.innerHTML = text;
+  term.appendChild(line);
+  term.scrollTop = term.scrollHeight;
 }
 
-async function loadTotal() {
-  try {
-    const r = await fetch('https://www.anipub.xyz/api/getAll');
-    const j = await r.json();
-    TOTAL = j.total || '???';
-    totalSpan.textContent = TOTAL;
-  } catch {
-    totalSpan.textContent = 'offline';
-  }
+function clear() {
+  term.innerHTML = `
+    <div class="logo">
+      █████╗  ███╗   ██╗██╗██████╗ ██╗   ██╗██████╗ <br>
+      ██╔══██╗████╗  ██║██║██╔══██╗██║   ██║██╔══██╗<br>
+      ███████║██╔██╗ ██║██║██████╔╝██║   ██║██████╔╝<br>
+      ██╔══██║██║╚██╗██║██║██╔═══╝ ██║   ██║██╔══██╗<br>
+      ██║  ██║██║ ╚████║██║██║     ╚██████╔╝██║████║<br>
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝<br><br>
+      <div class="title">A N I P U B • TERMINAL</div>
+    </div>
+    <div class="line dim">Database: ${TOTAL} anime entries loaded</div>
+    <div class="line">Type an ID (1–${TOTAL}), <b>w</b> for watch mode, or <b>help</b></div>
+  `;
 }
 
-async function getAnime(id) {
-  const r = await fetch(`https://www.anipub.xyz/api/info/${id}`);
-  if (!r.ok) throw '';
-  return await r.json();
-}
+function createInput() {
+  const line = document.createElement('div');
+  line.className = 'input-line';
+  line.innerHTML = `<span class="prompt">${mode === 'watch' ? 'watch' : 'user'}@anipub ~ $</span><input class="input" autofocus>`;
+  term.appendChild(line);
+  const input = line.querySelector('input');
+  input.focus();
 
-async function showAnime(id) {
-  output.innerHTML = '';
-  print(`Fetching anime <span class="bold">${id}</span>...<br>`);
-  try {
-    const a = await getAnime(id);
-    output.innerHTML = '';
-
-    print(`<span class="bold" style="font-size:21px;color:#d2a8ff;">${a.Name || 'Unknown Title'}</span><br>`);
-    const ep = (a.epCount || 0) + 1;
-
-    print(`<span class="dim"> ├─ Episodes </span> <span class="success bold">${ep}</span>`);
-    print(`<span class="dim"> ├─ Status   </span> <span class="yellow">${a.Status || 'N/A'}</span>`);
-    print(`<span class="dim"> ├─ Aired    </span> <span class="cyan">${a.Aired || 'N/A'}</span>`);
-    print(`<span class="dim"> ├─ Studio   </span> <span class="info">${a.Studios || 'N/A'}</span>`);
-    print(`<span class="dim"> ├─ Genres   </span> <span class="warning">${Array.isArray(a.Genres) ? a.Genres.join(', ') : a.Genres || '—'}</span>`);
-    if (a.MALScore) print(`<span class="dim"> ├─ Score    </span> <span class="success bold">${a.MALScore}</span>`);
-    print(`<span class="dim"> └─ Duration </span> ${a.Duration || 'N/A'}<br>`);
-
-    print(`<span class="dim">Synopsis:</span><br><span class="dim">${(a.DescripTion || 'No description.').replace(/\n/g, '<br>')}</span><br>`);
-    print(`<span class="success bold">Watch → </span><a href="https://anipub.xyz/aniplayer/${a._id}/0" target="_blank">Open Player</a>`);
-  } catch {
-    print(`<span class="error">Anime ID ${id} not found.</span>`);
-  }
-}
-
-function help() {
-  output.innerHTML = '';
-  print(`<span class="bold" style="color:#58a6ff;">Commands:</span>`);
-  print(`  <span class="yellow">[id]</span>      show anime info`);
-  print(`  <span class="yellow">w</span>         watch mode (type id → play)`);
-  print(`  <span class="yellow">back</span>      exit watch mode`);
-  print(`  <span class="yellow">help</span>      show this`);
-  print(`  <span class="yellow">clear</span>     clear screen`);
-  print(`  <span class="yellow">q</span>         quit<br>`);
-  print(`Database: <span class="success bold">${TOTAL}</span> titles`);
-}
-
-input.addEventListener('keydown', async e => {
-  if (e.key !== 'Enter') return;
-  const cmd = input.value.trim();
-  if (!cmd) { input.value = ''; return; }
-
-  print(`<span class="prompt">$</span> <span class="user">guest</span>@<span class="path">anipub</span>:~$ <span class="dim">${cmd}</span>`);
-  input.value = '';
-  const l = cmd.toLowerCase();
-
-  if (l === 'q') { print('<span class="success">Session closed.</span>'); input.disabled = true; return; }
-  if (l === 'clear') { output.innerHTML = ''; return; }
-  if (l === 'help') { help(); return; }
-  if (l === 'w') { mode = 'watch'; print('<span class="success">Watch mode on — enter ID to play</span>'); return; }
-  if (l === 'back' && mode === 'watch') { mode = 'main'; print('<span class="info">Back to main mode</span>'); return; }
-
-  if (/^\d+$/.test(l)) {
-    if (mode === 'watch') {
-      window.open(`https://anipub.xyz/aniplayer/${l}/0`, '_blank');
-      print(`<span class="success">Opening ID ${l}...</span>`);
-    } else {
-      await showAnime(l);
+  input.addEventListener('keydown', async e => {
+    if (e.key !== 'Enter') return;
+    const cmd = input.value.trim();
+    input.disabled = true;
+    if (cmd) {
+      println(`<span class="prompt">${mode === 'watch' ? 'watch' : 'user'}@anipub ~ $</span> ${cmd}`);
     }
+    await run(cmd);
+    createInput();
+  });
+
+  term.onclick = () => input.focus();
+}
+
+async function getJSON(url) {
+  try {
+    const r = await fetch(PROXY + encodeURIComponent(url));
+    if (!r.ok) return null;
+    const text = await r.text();
+    return text.trim() === '' ? null : JSON.parse(text);
+  } catch { return null; }
+}
+
+function fixImage(path) {
+  if (!path) return null;
+  return path.startsWith('http') ? path : `https://www.anipub.xyz/${path}`;
+}
+
+function showCover(url) {
+  println(`<img src="${url}" class="cover-img" alt="Anime Cover">`);
+}
+
+async function run(cmd) {
+  const low = cmd.toLowerCase();
+
+  if (low === 'clear') { clear(); return; }
+  if (low === 'help') {
+    println(`
+      <div class="card">
+        <div class="anime-title">Commands</div>
+        <b>ID</b> → Show anime info<br>
+        <b>w</b> → Enter watch mode<br>
+        <b>back</b> → Exit watch mode<br>
+        <b>help</b> → This help<br>
+        <b>clear</b> → Clear screen<br>
+        <b>q</b> → Quit
+      </div>
+    `);
+    return;
+  }
+  if (low === 'w') {
+    mode = 'watch';
+    println('<span style="color:#0f0">Watch mode activated — type any ID to play</span>');
+    return;
+  }
+  if (mode === 'watch' && low === 'back') {
+    mode = 'main';
+    println('Back to main mode');
+    return;
+  }
+  if (low === 'q') {
+    println('<span class="red">Terminal closed.</span>');
     return;
   }
 
-  print(`<span class="error">Unknown command</span>`);
-});
+  if (/^\d+$/.test(cmd)) {
+    const id = parseInt(cmd);
+    if (id < 1 || id > TOTAL) {
+      println(`<span class="red">Invalid ID! Use 1–${TOTAL}</span>`);
+      return;
+    }
+    if (mode === 'watch') {
+      window.open(`https://anipub.xyz/aniplayer/${id}/0`, '_blank');
+      println(`Opening player for ID ${id}...`);
+      return;
+    }
 
-loadTotal().then(() => {
-  print(`Ready. Type an ID, <span class="yellow">w</span> for watch mode, or <span class="yellow">help</span>`);
-});
+    println(`<span style="color:#0f0">Loading anime ID ${id}...</span>`);
+    const anime = await getJSON(`https://www.anipub.xyz/api/info/${id}`);
+    if (!anime?.Name) {
+      println('<span class="red">Anime not found</span>');
+      return;
+    }
+
+    const img = fixImage(anime.ImagePath);
+    const ep = (anime.epCount || 0) + 1;
+    const genres = Array.isArray(anime.Genres) ? anime.Genres.join(', ') : anime.Genres || '—';
+
+    println(`
+      <div class="card">
+        <div class="anime-title">${anime.Name}</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="label">Episodes</div><div class="value">${ep}</div></div>
+          <div class="info-item"><div class="label">Status</div><div class="value">${anime.Status || '—'}</div></div>
+          <div class="info-item"><div class="label">Aired</div><div class="value">${anime.Aired || '—'}</div></div>
+          <div class="info-item"><div class="label">Score</div><div class="value">${anime.MALScore || '—'}</div></div>
+          <div class="info-item"><div class="label">Studio</div><div class="value">${anime.Studios || '—'}</div></div>
+          <div class="info-item"><div class="label">Genres</div><div class="value">${genres}</div></div>
+        </div>
+        <div class="desc">${(anime.DescripTion || 'No description.').replace(/\n/g, '<br>')}</div>
+        <div>
+          ${img ? `<button class="btn" onclick="showCover('${img}')">View Cover</button>` : ''}
+          <a href="https://anipub.xyz/aniplayer/${anime._id}/0" target="_blank" class="btn watch">Watch Now</a>
+        </div>
+      </div>
+    `);
+    return;
+  }
+
+  println('<span class="red">Command not found — type help</span>');
+}
+
+window.showCover = showCover;
+
+// Start
+(async () => {
+  const totalData = await getJSON('https://www.anipub.xyz/api/getAll');
+  TOTAL = parseInt(totalData) || 80;
+
+  term.innerHTML = '';
+  term.innerHTML = `
+    <div class="logo">
+      █████╗  ███╗   ██╗██╗██████╗ ██╗   ██╗██████╗ <br>
+      ██╔══██╗████╗  ██║██║██╔══██╗██║   ██║██╔══██╗<br>
+      ███████║██╔██╗ ██║██║██████╔╝██║   ██║██████╔╝<br>
+      ██╔══██║██║╚██╗██║██║██╔═══╝ ██║   ██║██╔══██╗<br>
+      ██║  ██║██║ ╚████║██║██║     ╚██████╔╝██║████║<br>
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝<br><br>
+      <div class="title">A N I P U B • TERMINAL</div>
+    </div>
+    <div class="line dim">Database: ${TOTAL} anime entries loaded</div>
+    <div class="line">Type an ID (1–${TOTAL}), <b>w</b> for watch mode, or <b>help</b></div>
+  `;
+  createInput();
+})();
 </script>
 </body>
 </html>
